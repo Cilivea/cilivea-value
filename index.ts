@@ -1,4 +1,6 @@
-export type UUID = string
+import crypto from "node:crypto"
+
+export type UUID = crypto.UUID
 export type Primitive = string | number | boolean
 export type ValueType = Primitive | Primitive[] | { [key: string]: UUID }
 
@@ -7,6 +9,14 @@ type WidenLiteral<T> =
     T extends string ? string :
     T extends boolean ? boolean :
     T
+
+export function serialize(value: ValueType): string {
+    return JSON.stringify(value)
+}
+
+export function deserialize<T extends ValueType>(string: string): T {
+    return JSON.parse(string)
+}
 
 export class Value<T extends ValueType> {
     private _value: WidenLiteral<T>;
