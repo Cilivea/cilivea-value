@@ -177,7 +177,7 @@ This is a block describing heatpump, following a schema
 {
     "uuid": "019c8ead-2ef9-70af-9118-9026c328eb59",
     "$schema": "https://www.example.com/schemas/hvac/heatpump/0.1",
-    "fields": {
+    "value": {
         "temperature setpoint": "019c8eb0-18e3-7019-a6e1-ebbec42565b8",
         "current temperature": "019c8eb0-583b-7307-a278-6cf32e4ea5c3",
         "on/off": "019c8eb1-2938-71bb-a50a-e1145664e8c3"
