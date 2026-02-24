@@ -1,7 +1,7 @@
 
-type typemap = { [key: string]: boolean | undefined | "string" | "number" | "string?" | "number?" | typemap, $$optional?: true }
+export type typemap = { [key: string]: boolean | undefined | "string" | "number" | "string?" | "number?" | typemap, $$optional?: true }
 
-function verify_object(obj: any, typemap: typemap): boolean {
+export function verify_object(obj: any, typemap: typemap): boolean {
     for (let [key, value] of Object.entries(typemap)) {
         if (typeof value === "object") {
             if (typeof obj[key] !== "object") {
@@ -24,28 +24,3 @@ function verify_object(obj: any, typemap: typemap): boolean {
 
     return true
 }
-
-let obj = {
-    "a": "hello",
-    "b": 2,
-    "c": {
-        "d": 4,
-        "e": "5"
-    }
-}
-let typeobj: typemap = {
-    "a": "string",
-    "b": "number",
-    "c": {
-        "d": "number",
-        "e": "string",
-        "f": "number?",
-        "g": "string?"
-    },
-    "d": {
-        "$$optional": true,
-        "f": "number"
-    }
-}
-
-console.log(verify_object(obj, typeobj))
