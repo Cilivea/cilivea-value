@@ -1,21 +1,36 @@
-import crypto from "node:crypto"
+export type UUID = string;
+export type Primitive = string | number | boolean;
 
-export type UUID = crypto.UUID
-export type Primitive = string | number | boolean
-export type ValueType = Primitive | Primitive[] | { [key: string]: UUID }
+export type MetaType = { [key: string]: string | MetaType };
 
-type WidenLiteral<T> =
-    T extends number ? number :
-    T extends string ? string :
-    T extends boolean ? boolean :
-    T
+type WidenLiteral<T> = T extends number
+    ? number
+    : T extends string
+      ? string
+      : T extends boolean
+        ? boolean
+        : T;
 
-export function serialize(value: ValueType): string {
-    return JSON.stringify(value)
+export interface TypeRegistry {
+    primitive: Primitive;
+    "primitive[]": Primitive[];
+    complex: { [key: string]: UUID };
+}
+
+export type TypeName = keyof TypeRegistry;
+export type ValueType = TypeRegistry[TypeName];
+export type ResolveType<K extends TypeName> = TypeRegistry[K];
+
+export function serialize<K extends TypeName>(value: TypeRegistry[K]): string {
+    return JSON.stringify(value);
 }
 
 export function deserialize<T extends ValueType>(string: string): T {
-    return JSON.parse(string)
+    return JSON.parse(string);
+}
+
+export function get_type_name<K extends TypeName>(name: K): K {
+    return name;
 }
 
 export class Value<T extends ValueType> {
@@ -28,44 +43,41 @@ export class Value<T extends ValueType> {
     }
 
     constructor(value: T) {
-        this._value = value as WidenLiteral<T>
+        this._value = value as WidenLiteral<T>;
     }
 
     static serialize(value: ValueType): string {
-        return JSON.stringify(value)
+        return JSON.stringify(value);
     }
 
     serialize(): string {
-        return JSON.stringify(this.value)
+        return JSON.stringify(this.value);
     }
 
     static deserialize<P extends ValueType>(string: string): P {
-        return JSON.parse(string)
+        return JSON.parse(string);
     }
 
     static from_string<P extends ValueType>(string: string): Value<P> {
-        return new Value(Value.deserialize(string))
+        return new Value(Value.deserialize(string));
     }
 }
 
-export type ValueUpdateHandler = (self: ValueType) => void
-export class UpdatorValue<T extends ValueType> extends Value<T> {
-    value_update_handlers: ValueUpdateHandler[] = []
+export class Block<T extends ValueType> {
+    uuid: UUID;
+    value: Value<T>;
+    meta: MetaType;
+    has_meta: boolean;
 
-    on_value_updated(f: ValueUpdateHandler) {
-        this.value_update_handlers.push(f)
-    }
-
-    update() {
-        this.value_update_handlers.forEach(fn => fn(this.value))
-    }
-
-    public override get value(): WidenLiteral<T> {
-        return super.value;
-    }
-
-    public override set value(v: WidenLiteral<T>) {
-        super.value = v;
-        this.update()
+    constructor(uuid: UUID, value: Value<T>, meta?: MetaType) {
+        this.uuid = uuid;
+        this.value = value;
+        if (meta === undefined) {
+            this.meta = {};
+            this.has_meta = false;
+        } else {
+            this.meta = meta;
+            this.has_meta = true;
+        }
     }
 }
